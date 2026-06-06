@@ -1,0 +1,43 @@
+# external-dns for the shared alpha-k-eks cluster.
+# Reconciles Route53 records from Ingress hosts so applications no longer need
+# per-app sync-dns scripts. Install:
+#
+#   helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+#   helm upgrade --install external-dns external-dns/external-dns \
+#     -n kube-system -f kubernetes/external-dns/values.yaml
+#
+# Ownership is tracked via TXT records tagged with txtOwnerId, so external-dns
+# only ever modifies/deletes records it created.
+
+provider:
+  name: aws
+
+# us-east-1 hosted zones. Leave domainFilters empty to manage every zone in the
+# account, or list specific apex domains to scope it.
+domainFilters:
+  - roulettemanager.com.br
+  - noirencontros.com.br
+
+# Read desired DNS names from Ingress resources (ALB hostnames are resolved
+# automatically from the Ingress status).
+sources:
+  - ingress
+
+policy: sync
+registry: txt
+txtOwnerId: alpha-k-eks
+
+interval: 1m
+
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::624234316342:role/alpha-k-eks-external-dns-role
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

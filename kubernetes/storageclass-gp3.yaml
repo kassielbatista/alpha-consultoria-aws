@@ -1,0 +1,16 @@
+# Default StorageClass backed by the AWS EBS CSI driver (gp3).
+# EKS ships a legacy `gp2` class using the removed in-tree provisioner; this
+# replaces it as the cluster default for dynamic PVC provisioning.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+parameters:
+  type: gp3
+  encrypted: "true"

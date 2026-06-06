@@ -1,0 +1,32 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and customize as needed
+
+region       = "us-east-1"
+project_name = "alpha-k"
+environment  = "prod"
+
+# VPC Configuration
+vpc_cidr           = "10.0.0.0/16"
+az_count           = 2
+single_nat_gateway = true  # Set to false for HA (higher cost)
+
+# EKS Configuration
+cluster_version     = "1.35"
+node_instance_types = ["t3.small"]
+node_desired_size   = 2
+node_min_size       = 1
+node_max_size       = 4
+
+# ECR Configuration
+ecr_repository_name = "alpha-k-app"
+
+# Monitoring Configuration
+alert_email            = ""  # Optional: your-email@example.com
+cpu_alarm_threshold    = 70
+memory_alarm_threshold = 80
+create_dashboard       = true
+
+# GitHub Actions OIDC (for CI/CD)
+# Set these to enable GitHub Actions authentication
+github_org  = ""  # e.g., "your-username" or "your-org"
+github_repo = ""  # e.g., "alpha_k_infra"

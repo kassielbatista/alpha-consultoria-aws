@@ -124,6 +124,21 @@ module "dns_noir" {
   wait_for_validation       = var.wait_for_cert_validation
 }
 
+# Apex TXT: SPF for SES + optional Google Search Console verification.
+resource "aws_route53_record" "noir_apex_txt" {
+  count = var.noir_domain_name != "" ? 1 : 0
+
+  zone_id = module.dns_noir[0].zone_id
+  name    = var.noir_domain_name
+  type    = "TXT"
+  ttl     = 300
+  records = compact([
+    "v=spf1 include:amazonses.com ~all",
+    var.noir_google_site_verification != "" ? var.noir_google_site_verification : null,
+  ])
+  allow_overwrite = true
+}
+
 # ECR repositories for the noir-encontros images (api, web)
 module "ecr_noir" {
   source   = "./modules/ecr"
@@ -150,6 +165,18 @@ module "github_oidc_noir" {
   depends_on = [module.eks, module.github_oidc]
 }
 
+# SES domain identity + DKIM/SPF for transactional email
+module "ses_noir" {
+  source = "./modules/ses-domain"
+  count  = var.noir_domain_name != "" ? 1 : 0
+
+  domain_name     = var.noir_domain_name
+  route53_zone_id = module.dns_noir[0].zone_id
+  region          = var.region
+
+  depends_on = [module.dns_noir]
+}
+
 # S3 uploads bucket + IRSA for the noir-encontros API pods
 module "noir_uploads" {
   source = "./modules/app-uploads-s3"
@@ -164,6 +191,8 @@ module "noir_uploads" {
   cdn_domain_name           = "cdn.${var.noir_domain_name}"
   acm_certificate_arn       = module.dns_noir[0].certificate_arn
   route53_zone_id           = module.dns_noir[0].zone_id
+  enable_ses      = true
+  ses_domain_name = var.noir_domain_name
 
   tags = {
     Application = "noir-encontros"

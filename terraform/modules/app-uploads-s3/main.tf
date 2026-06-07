@@ -1,4 +1,5 @@
 data "aws_partition" "current" {}
+data "aws_region" "current" {}
 
 resource "aws_s3_bucket" "uploads" {
   bucket = var.bucket_name
@@ -84,6 +85,27 @@ resource "aws_iam_role_policy" "api_uploads" {
           "s3:DeleteObject",
         ]
         Resource = "${aws_s3_bucket.uploads.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "api_ses" {
+  count = var.enable_ses ? 1 : 0
+  name  = "${var.role_name}-ses"
+  role  = aws_iam_role.api.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SendEmail"
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+        ]
+        Resource = "arn:${data.aws_partition.current.partition}:ses:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:identity/${var.ses_domain_name}"
       }
     ]
   })

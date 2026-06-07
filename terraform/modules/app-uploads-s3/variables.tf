@@ -51,3 +51,15 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_ses" {
+  description = "Attach SES SendEmail permissions to the API IRSA role"
+  type        = bool
+  default     = false
+}
+
+variable "ses_domain_name" {
+  description = "Verified SES domain for SendEmail permissions (e.g. example.com)"
+  type        = string
+  default     = ""
+}

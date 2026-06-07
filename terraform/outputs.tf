@@ -155,6 +155,11 @@ output "noir_api_irsa_role_arn" {
   value       = var.noir_domain_name != "" ? module.noir_uploads[0].api_role_arn : null
 }
 
+output "noir_ses_domain_identity_arn" {
+  description = "SES domain identity ARN for noirencontros.com.br"
+  value       = var.noir_domain_name != "" ? module.ses_noir[0].domain_identity_arn : null
+}
+
 output "noir_uploads_cdn_url" {
   description = "CloudFront CDN base URL for noir-encontros media (use as NEXT_PUBLIC_UPLOAD_URL in web build)"
   value       = var.noir_domain_name != "" ? module.noir_uploads[0].cdn_url : null

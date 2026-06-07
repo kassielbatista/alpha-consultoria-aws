@@ -179,3 +179,9 @@ variable "noir_github_repo" {
   type        = string
   default     = ""
 }
+
+variable "noir_google_site_verification" {
+  description = "Google Search Console domain verification TXT value (e.g. google-site-verification=...)"
+  type        = string
+  default     = ""
+}
